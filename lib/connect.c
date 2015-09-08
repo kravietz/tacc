@@ -51,7 +51,7 @@ int tac_connect(u_long *server, int servers) {
 				struct in_addr in;
 				bcopy(&server[tries], &in.s_addr, sizeof(in.s_addr));
        	   		syslog(LOG_WARNING, 
-				"%s: socket creation error for %s: %m", __FUNCTION__, in);
+				"%s: socket creation failed: %m", __FUNCTION__);
 			tries++;
 			continue;
 		}
@@ -62,14 +62,13 @@ int tac_connect(u_long *server, int servers) {
 				struct in_addr in;
 				bcopy(&server[tries], &in.s_addr, sizeof(in.s_addr));
      	  		syslog(LOG_WARNING, 
-				"%s: connection to %s failed: %m", __FUNCTION__, in);
+				"%s: connection failed: %m", __FUNCTION__);
 			tries++;
 			continue;
     		}
 
 		/* connected ok */
-		TACDEBUG((LOG_DEBUG, "%s: connected to %s", __FUNCTION__, \
-			       	inet_ntoa(server[tries])));
+		//TACDEBUG((LOG_DEBUG, "%s: connected to %s", __FUNCTION__, inet_ntoa(server[tries])));
 
 		return(fd);
 	}
