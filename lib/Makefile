@@ -1,8 +1,8 @@
 CC = gcc
 AR = ar
-#DEBUG = -ggdb3 #-DDEBUGTAC
+#DEBUG = -g -DDEBUGTAC
 
-CFLAGS = -pipe -fPIC -I../include $(OPTIMIZE)
+CFLAGS = -I../include $(OPTIMIZE) $(DEBUG)
 LIBRARY = libtac.a
 
 LIBSRCS = 	connect.c \
