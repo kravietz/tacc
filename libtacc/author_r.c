@@ -31,7 +31,7 @@ void tac_author_read(int fd, struct areply *re) {
 	HDR th;
 	struct author_reply *tb = NULL;
 	int len_from_header, r, len_from_body;
-	char *pktp;
+	u_char *pktp;
 	char *msg = NULL;
 
 	bzero(re, sizeof(struct areply));
