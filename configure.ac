@@ -25,6 +25,7 @@ AC_FUNC_REALLOC
 AC_CHECK_FUNCS([alarm bzero gethostbyname getpass gettimeofday inet_ntoa memset socket])
 
 AX_PRINTF_SIZE_T
+AX_APPEND_FLAG(["-fPIC"],[CFLAGS])
 AX_CHECK_COMPILE_FLAG(["-fstack-protector-all"], [AX_APPEND_FLAG(["-fstack-protector-all"],[CFLAGS])], [])
 AX_CHECK_COMPILE_FLAG(["-Wl,-z,relro"], [AX_APPEND_FLAG(["-Wl,-z,relro"],[CFLAGS])], [])
 AX_CHECK_COMPILE_FLAG(["-Wl,-z,now"], [AX_APPEND_FLAG(["-Wl,-z,now"],[CFLAGS])], [])
