@@ -11,10 +11,12 @@
 #include <syslog.h>
 #include <stdlib.h>
 
+#include "config.h"
+
 void *xcalloc(size_t nmemb, size_t size) {
 	register void *val = calloc(nmemb, size);
 	if(val == 0) {
-		syslog(LOG_ERR, "%s: calloc(%zu,%zu) failed", __FUNCTION__, 
+		syslog(LOG_ERR, "%s: calloc(%" PRI_SIZE_T_MODIFIER "u,%" PRI_SIZE_T_MODIFIER "u) failed", __FUNCTION__, 
 			nmemb, size);
 		exit(1);
 	}
@@ -24,7 +26,7 @@ void *xcalloc(size_t nmemb, size_t size) {
 void *xrealloc(void *ptr, size_t size) {
 	register void *val = realloc(ptr, size);
 	if(val == 0) {
-		syslog(LOG_ERR, "%s: realloc(%zu) failed", __FUNCTION__, size);
+		syslog(LOG_ERR, "%s: realloc(%" PRI_SIZE_T_MODIFIER "u) failed", __FUNCTION__, size);
 		exit(1);
 	}
 	return val;
