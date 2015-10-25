@@ -124,7 +124,7 @@ void tac_author_read(int fd, struct areply *re) {
 		case AUTHOR_STATUS_PASS_ADD:
 		case AUTHOR_STATUS_PASS_REPL:
 			{
-				char *argp; 
+				u_char *argp; 
 
 				if(!re->msg) re->msg=author_ok_msg;
 				re->status=tb->status;
