@@ -147,7 +147,7 @@ void tac_author_read(int fd, struct areply *re) {
 					if(sep == NULL)
 							index(buff, '*');
 					if(sep == NULL)
-							syslog(LOG_WARNING, "%s: attribute contains no separator: %s", buff);
+							syslog(LOG_WARNING, "%s: attribute contains no separator: %s", __FUNCTION__, buff);
 					*sep = '\0';
 					value = ++sep;
 					/* now buff points to attribute name,
