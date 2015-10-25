@@ -25,28 +25,23 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <time.h>
-#ifdef __FreeBSD__
-#include "getopt.h"
-#include <libutil.h>
-#else
 #include <getopt.h>
-#endif
 #include <ctype.h>
+#include <openssl/rand.h>
 
 #include "tacplus.h"
 #include "libtac.h"
-#include "magic.h"
 
 /* CONFIGURABLE PARAMETERS */
 
 /* TACACS+ server FQDN or IP address */
-#define DEFAULT_SERVER "195.116.211.2"
+#define DEFAULT_SERVER "tacplus.example.com"
 
 /* key used to encrypt TACACS+ packets 
  * should be same as key set in TACACS+
  * server configuration 
  */ 
-#define DEFAULT_SECRET "dupa-20"
+#define DEFAULT_SECRET "HardCodedPassword"
 
 /* Prompt displayed when asking for password */
 #define PASSWORD_PROMPT "Password: "
@@ -71,9 +66,6 @@
 void sighandler(int sig);
 void showusage(char *argv0);
 unsigned long getservername(char *serv);
-#if (defined(__linux__) && ! __GLIBC__ >= 2) || defined(__FreeBSD)
-int logwtmp (char *line, char *name, char *host);
-#endif
 void showusage(char *progname);
 void showversion(char *progname);
 void authenticate(unsigned long *tac_server, int tac_servers, char *user,
@@ -247,8 +239,6 @@ int main(int argc, char **argv) {
 	/* open syslog before any TACACS+ calls */
 	openlog("tacc", LOG_CONS|LOG_PID, LOG_AUTHPRIV);
 
-	magic_init();
-	
 	if(do_authen)
 			authenticate(tac_server, tac_servers, user, pass, tty);
 
@@ -282,7 +272,7 @@ int main(int argc, char **argv) {
 		struct tac_attrib *attr = NULL;
 		sprintf(buf, "%lu", time(0));
 		tac_add_attrib(&attr, "start_time", buf);
-		task_id=(short int) magic();
+        RAND_pseudo_bytes((unsigned char *) &task_id, sizeof(task_id));
 		sprintf(buf, "%hu", task_id);
 		tac_add_attrib(&attr, "task_id", buf);
 		tac_add_attrib(&attr, "service", "ppp");
@@ -493,114 +483,6 @@ unsigned long getservername(char *serv) {
 		return(addr.s_addr);
 
 	return(-1);
-}
-
-/*
- * This is logwtmp() taken from sys-linux.c, changed a bit for
- * compatibility with tacc.c
- */
-
-#if (defined(__linux__) && ! __GLIBC__ >= 2) || defined(__FreeBSD)
-int logwtmp (char *line, char *name, char *host)
-  {
-    int    mode;
-    int    wtmp;
-    struct utmp ut, *utp;
-    pid_t  mypid = getpid();
-/*
- * Control the 'mesg' function based upon the state of the logon
- * operation. If the user is being 'logged on' then disable the
- * mesg function. When the user 'logs off' then re-enable it.
- */
-    mode = (*name != '\0') ? 0600 : 0622;
-/*    if (chmod (devnam, mode) < 0)
-      {
-	syslog (LOG_ERR, "chmod(\"%s\", 0%o): %m", devnam, mode);
-      }
-*/
-/*
- * Update the signon database for users.
- * Christoph Lameter: Copied from poeigl-1.36 Jan 3, 1996
- */
-    utmpname(_PATH_UTMP);
-    setutent();
-    while ((utp = getutent()) && (utp->ut_pid != mypid))
-        /* nothing */;
-
-    /* Is this call really necessary? There is another one after the 'put' */
-    endutent();
-    
-    if (utp)
-      {
-	memcpy(&ut, utp, sizeof(ut));
-      }
-    else
-      {
-	/* some gettys/telnetds don't initialize utmp... */
-	memset(&ut, 0, sizeof(ut));
-      }
-
-    if (ut.ut_id[0] == 0)
-      {
-	strncpy(ut.ut_id, line + 3, sizeof(ut.ut_id));
-      }
-	
-    strncpy(ut.ut_user, name, sizeof(ut.ut_user));
-    strncpy(ut.ut_line, line, sizeof(ut.ut_line));
-
-    time(&ut.ut_time);
-
-    ut.ut_type = USER_PROCESS;
-    ut.ut_pid  = mypid;
-
-    /* Insert the host name if one is supplied */
-    if (*host)
-      {
-	strncpy (ut.ut_host, host, sizeof(ut.ut_host));
-      }
-
-    /* CL: Makes sure that the logout works */
-    if (*host == 0 && *name==0)
-      {
-	ut.ut_host[0]=0;
-      }
-
-    pututline(&ut);
-    endutent();
-/*
- * Update the wtmp file.
- */
-    wtmp = open(_PATH_WTMP, O_APPEND|O_WRONLY);
-    if (wtmp >= 0)
-      {
-	flock(wtmp, LOCK_EX);
-
-    	/* we really should check for error on the write for a full disk! */
-	write (wtmp, (char *)&ut, sizeof(ut));
-	close (wtmp);
-
-	flock(wtmp, LOCK_UN);
-      }
-  }
-#endif
-
-/*
- * Make a string representation of a network IP address.
- */
-char *
-ip_ntoa(ipaddr)
-u_int32_t ipaddr;
-{
-    static char b[64];
-
-    ipaddr = ntohl(ipaddr);
-
-    sprintf(b, "%d.%d.%d.%d",
-	    (u_char)(ipaddr >> 24),
-	    (u_char)(ipaddr >> 16),
-	    (u_char)(ipaddr >> 8),
-	    (u_char)(ipaddr));
-    return b;
 }
 
 void timeout_handler(int signum)

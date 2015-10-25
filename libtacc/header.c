@@ -47,7 +47,7 @@ HDR *_tac_req_header(u_char type) {
  	th->encryption=TAC_PLUS_ENCRYPTED;
  
  	/* make session_id from pseudo-random number */
-    RAND_pseudo_bytes(session_id, sizeof(session_id));
+    RAND_pseudo_bytes((unsigned char *) &session_id, sizeof(session_id));
  	th->session_id = htonl(session_id);
 
  	return(th);
