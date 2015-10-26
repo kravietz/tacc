@@ -120,7 +120,6 @@ void tac_author_read(int fd, struct areply *re) {
 	/* prepare status */
 	switch(tb->status) {
 		/* success conditions */
-		/* XXX support optional vs mandatory arguments */
 		case AUTHOR_STATUS_PASS_ADD:
 		case AUTHOR_STATUS_PASS_REPL:
 			{
@@ -143,11 +142,13 @@ void tac_author_read(int fd, struct areply *re) {
 					
 					bcopy(argp, buff, *pktp);
 					buff[(int)*pktp] = '\0';
-					sep=index(buff, '=');
+					sep=index(buff, '='); // mandatory attribute
 					if(sep == NULL)
-							index(buff, '*');
-					if(sep == NULL)
+							sep = index(buff, '*'); // optional attribute
+					if(sep == NULL) {
 							syslog(LOG_WARNING, "%s: attribute contains no separator: %s", __FUNCTION__, buff);
+                            continue;
+                    }
 					*sep = '\0';
 					value = ++sep;
 					/* now buff points to attribute name,
