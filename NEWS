@@ -1,0 +1,5 @@
+Version 1.7 - October 2015
+==========================
+This version is a major rewrite of the project that was not touched since early 2000's. Building process has been rewritten
+to use GNU autoconf, license has been explicitly specified (GNU GPL3) and hard-coded MD5 and random number implementations
+were replaced with OpenSSL calls.
