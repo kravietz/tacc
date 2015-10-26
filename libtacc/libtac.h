@@ -16,6 +16,12 @@
 #define TACDEBUG(x)
 #endif
 
+/* maximum length of server response body */
+#define MAX_BODY_LEN    128000 /* approx 128 kB */
+
+/* maximum number of attributes in server response body */
+#define MAX_ATTR_NUM    100
+
 /* version.c */
 extern int tac_ver_major;
 extern int tac_ver_minor;

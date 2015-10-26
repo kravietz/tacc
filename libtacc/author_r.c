@@ -56,6 +56,14 @@ void tac_author_read(int fd, struct areply *re) {
 	}
 
  	len_from_header=ntohl(th.datalength);
+
+    if(len_from_header > MAX_BODY_LEN) {
+  		syslog(LOG_ERR, "%s: response body too big %u vs %u limit", __FUNCTION__, len_from_header, MAX_BODY_LEN);
+		re->msg = system_err_msg;
+		re->status = AUTHOR_STATUS_ERROR;
+		goto AuthorExit;
+    }
+
  	tb=(struct author_reply *) xcalloc(1, len_from_header);
 
  	/* read reply packet body */
@@ -80,6 +88,13 @@ void tac_author_read(int fd, struct areply *re) {
 	    		tb->msg_len + tb->data_len;
 	    
 	pktp = (u_char *) tb + TAC_AUTHOR_REPLY_FIXED_FIELDS_SIZE;
+
+    if(tb->arg_cnt > MAX_ATTR_NUM) {
+  		syslog(LOG_ERR, "%s: too many attributes %u vs %u limit", __FUNCTION__, tb->arg_cnt, MAX_ATTR_NUM);
+		re->msg = system_err_msg;
+		re->status = AUTHOR_STATUS_ERROR;
+		goto AuthorExit;
+    }
 	
 	for(r = 0; r < tb->arg_cnt; r++) {
 	    len_from_body += sizeof(u_char); /* add arg length field's size*/
