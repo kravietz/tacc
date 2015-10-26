@@ -45,9 +45,7 @@ char *tac_authen_pap_read(int fd) {
  	len_from_header=ntohl(th.datalength);
     if(len_from_header > MAX_BODY_LEN) {
   		syslog(LOG_ERR, "%s: response body too big %u vs %u limit", __FUNCTION__, len_from_header, MAX_BODY_LEN);
-		re->msg = system_err_msg;
-		re->status = AUTHOR_STATUS_ERROR;
-		goto AuthorExit;
+  		return(system_err_msg);
     }
 
  	tb=(struct authen_reply *) xcalloc(1, len_from_header);
