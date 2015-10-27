@@ -25,9 +25,7 @@ char *tac_account_read(int fd) {
 
 	r=read(fd, &th, TAC_PLUS_HDR_SIZE);
 	if(r < TAC_PLUS_HDR_SIZE) {
-  		syslog(LOG_ERR,
- 			"%s: short PAP acct header, %d of %d: %m", __FUNCTION__,
-		 	r, TAC_PLUS_HDR_SIZE);
+  		syslog(LOG_ERR, "%s: short PAP acct header, %d of %d: %m", __FUNCTION__, r, TAC_PLUS_HDR_SIZE);
   		return(system_err_msg);
  	}
 
@@ -51,6 +49,7 @@ char *tac_account_read(int fd) {
 			 "%s: incomplete message body, %d bytes, expected %d: %m",
 			 __FUNCTION__,
 			 r, len_from_header);
+        free(tb);
   		return(system_err_msg);
  	}
 
@@ -62,14 +61,26 @@ char *tac_account_read(int fd) {
             sizeof(tb->status) + tb->msg_len + tb->data_len;
 
  	if(len_from_header != len_from_body) {
-  		syslog(LOG_ERR,
-			"%s: invalid reply content, incorrect key?",
-			__FUNCTION__);
+  		syslog(LOG_ERR, "%s: invalid reply content, incorrect key?", __FUNCTION__);
+        free(tb);
   		return(system_err_msg);
  	}
 
  	/* save status and clean up */
  	r=tb->status;
+
+ 	/* server logged our request successfully */
+	if(r == TAC_PLUS_ACCT_STATUS_SUCCESS) {
+		TACDEBUG((LOG_DEBUG, "%s: accounted ok", __FUNCTION__))
+		return(NULL);
+	}
+
+    /* it was not successful, process the error message */
+    if(tb->msg_len > MAX_MSG_LEN) {
+  		syslog(LOG_ERR, "%s: response message too long: %u vs %u limit", __FUNCTION__, tb->msg_len, MAX_MSG_LEN);
+        free(tb);
+  		return(system_err_msg);
+    }
 	if(tb->msg_len) {
 		msg=(char *) xcalloc(1, tb->msg_len);
 		bcopy(tb+TAC_ACCT_REPLY_FIXED_FIELDS_SIZE, msg, tb->msg_len); 
@@ -78,11 +89,6 @@ char *tac_account_read(int fd) {
 
  	free(tb);
 
- 	/* server logged our request successfully */
-	if(r == TAC_PLUS_ACCT_STATUS_SUCCESS) {
-		TACDEBUG((LOG_DEBUG, "%s: accounted ok", __FUNCTION__))
-		return(NULL);
-	}
 	/* return pointer to server message */
 	syslog(LOG_DEBUG, "%s: accounting failed, server reply was %d (%s)", 
 					__FUNCTION__, r, msg);

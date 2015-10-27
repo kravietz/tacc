@@ -22,6 +22,9 @@
 /* maximum number of attributes in server response body */
 #define MAX_ATTR_NUM    100
 
+/* maximum length of response message in bytes */
+#define MAX_MSG_LEN     1000
+
 /* version.c */
 extern int tac_ver_major;
 extern int tac_ver_minor;

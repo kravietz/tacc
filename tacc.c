@@ -249,6 +249,11 @@ int main(int argc, char **argv) {
 		tac_add_attrib(&attr, "protocol", "lcp");
 	
 		tac_fd = tac_connect(tac_server, tac_servers);
+	    if(tac_fd < 0) {
+		    if(!quiet) printf("Error connecting to TACACS+ server: %m\n");
+		    exit(EXIT_ERR);
+	    }
+
 		tac_author_send(tac_fd, user, tty, attr);
 	
 		tac_author_read(tac_fd, &arep);
@@ -279,6 +284,10 @@ int main(int argc, char **argv) {
 		tac_add_attrib(&attr, "protocol", "lcp");
 		
 		tac_fd=tac_connect(tac_server, tac_servers);
+	    if(tac_fd < 0) {
+		    if(!quiet) printf("Error connecting to TACACS+ server: %m\n");
+		    exit(EXIT_ERR);
+	    }
 
 		tac_account_send(tac_fd, TAC_PLUS_ACCT_FLAG_START, user,
 				tty, 0, attr);
@@ -357,6 +366,10 @@ int main(int argc, char **argv) {
 		tac_add_attrib(&attr, "task_id", buf);
 	
 		tac_fd=tac_connect(tac_server, tac_servers);
+	    if(tac_fd < 0) {
+		    if(!quiet) printf("Error connecting to TACACS+ server: %m\n");
+		    exit(EXIT_ERR);
+	    }
 
 		tac_account_send(tac_fd, TAC_PLUS_ACCT_FLAG_STOP, user,
 			tty, 0, attr);
@@ -393,7 +406,6 @@ void authenticate(unsigned long *tac_server, int tac_servers, char *user,
 
 
 	tac_fd=tac_connect(tac_server, tac_servers);
-	
 	if(tac_fd < 0) {
 		if(!quiet) printf("Error connecting to TACACS+ server: %m\n");
 		exit(EXIT_ERR);

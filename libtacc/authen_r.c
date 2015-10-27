@@ -57,6 +57,7 @@ char *tac_authen_pap_read(int fd) {
 			 "%s: incomplete message body, %d bytes, expected %d: %m",
 			 __FUNCTION__,
 			 r, len_from_header);
+        free(tb);
   		return(system_err_msg);
  	}
 
@@ -72,11 +73,19 @@ char *tac_authen_pap_read(int fd) {
   		syslog(LOG_ERR,
 			"%s: invalid reply content, incorrect key?",
 			__FUNCTION__);
+        free(tb);
   		return(system_err_msg);
  	}
 
  	/* save status and clean up */
  	r=tb->status;
+
+ 	/* server authenticated username and password successfully */
+ 	if(r == TAC_PLUS_AUTHEN_STATUS_PASS) {
+		TACDEBUG((LOG_DEBUG, "%s: authentication ok", __FUNCTION__))
+		return(NULL);
+	}
+
 	if(tb->msg_len) {
 		msg=(char *) xcalloc(1, tb->msg_len);
 		bcopy(tb+TAC_AUTHEN_REPLY_FIXED_FIELDS_SIZE, msg, tb->msg_len); 
@@ -84,12 +93,6 @@ char *tac_authen_pap_read(int fd) {
 		msg="Login incorrect";
 
  	free(tb);
-
- 	/* server authenticated username and password successfully */
- 	if(r == TAC_PLUS_AUTHEN_STATUS_PASS) {
-		TACDEBUG((LOG_DEBUG, "%s: authentication ok", __FUNCTION__))
-		return(NULL);
-	}
 		
 	/* return pointer to server message */
 	syslog(LOG_DEBUG, "%s: authentication failed, server reply was %d (%s)", 

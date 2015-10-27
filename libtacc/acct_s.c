@@ -33,10 +33,11 @@ int tac_account_send(int fd, int type, char *user, char *tty, char *rem_addr,
 	u_char *pkt;
 	int ret = 0;
 
-	th=_tac_req_header(TAC_PLUS_ACCT);
-
-	if(!user || !tty)
+	if(!user || !tty) {
 			return -1;
+    }
+
+	th=_tac_req_header(TAC_PLUS_ACCT);
 	
 	/* set header options */
  	th->version=TAC_PLUS_VER_0;
@@ -92,8 +93,9 @@ int tac_account_send(int fd, int type, char *user, char *tty, char *rem_addr,
 	/* fill user and port fields */
 	PUTATTR(user, user_len)
 	PUTATTR(tty, port_len)
-	if(rem_addr)
+	if(rem_addr) {
 		PUTATTR(rem_addr, rem_addr_len)
+    }
 
 	/* fill attributes */
 	a = attr;
@@ -110,9 +112,7 @@ int tac_account_send(int fd, int type, char *user, char *tty, char *rem_addr,
  	w=write(fd, th, TAC_PLUS_HDR_SIZE);
 
 	if(w < TAC_PLUS_HDR_SIZE) {
-		syslog(LOG_ERR, "%s: acct hdr send failed: wrote %d of %d",
-				__FUNCTION__, w,
-				TAC_PLUS_HDR_SIZE);
+		syslog(LOG_ERR, "%s: acct hdr send failed: wrote %d of %d", __FUNCTION__, w, TAC_PLUS_HDR_SIZE);
 		ret = -1;
 	}
 	
@@ -122,9 +122,7 @@ int tac_account_send(int fd, int type, char *user, char *tty, char *rem_addr,
 	/* write body */
 	w=write(fd, pkt, pkt_len);
 	if(w < pkt_len) {
-		syslog(LOG_ERR, "%s: acct body send failed: wrote %d of %d", 
-				__FUNCTION__, w,
-				pkt_len);
+		syslog(LOG_ERR, "%s: acct body send failed: wrote %d of %d", __FUNCTION__, w, pkt_len);
 		ret = -1;
 	}
 

@@ -14,7 +14,7 @@
 #include "config.h"
 
 void *xcalloc(size_t nmemb, size_t size) {
-	register void *val = calloc(nmemb, size);
+	register void *val = calloc(nmemb, size+1);
 	if(val == 0) {
 		syslog(LOG_ERR, "%s: calloc(%" PRI_SIZE_T_MODIFIER "u,%" PRI_SIZE_T_MODIFIER "u) failed", __FUNCTION__, 
 			nmemb, size);
@@ -24,7 +24,7 @@ void *xcalloc(size_t nmemb, size_t size) {
 }
 
 void *xrealloc(void *ptr, size_t size) {
-	register void *val = realloc(ptr, size);
+	register void *val = realloc(ptr, size+1);
 	if(val == 0) {
 		syslog(LOG_ERR, "%s: realloc(%" PRI_SIZE_T_MODIFIER "u) failed", __FUNCTION__, size);
 		exit(1);

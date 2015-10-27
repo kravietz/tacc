@@ -111,10 +111,17 @@ void tac_author_read(int fd, struct areply *re) {
 		goto AuthorExit;
  	}
 
+ 	if(tb->msg_len > MAX_MSG_LEN) {
+  		syslog(LOG_ERR, "%s: message too long %u vs %u limit", __FUNCTION__, tb->msg_len, MAX_MSG_LEN);
+		re->msg = system_err_msg;
+		re->status = AUTHOR_STATUS_ERROR;
+		goto AuthorExit;
+ 	}
+
 	/* packet seems to be consistent, prepare return messages */
 	/* server message for user */
 	if(tb->msg_len) {
-		char *msg = (char *) xcalloc(1, tb->msg_len+1);
+		char *msg = (char *) xcalloc(1, tb->msg_len);
 		bcopy((u_char *) tb+TAC_AUTHOR_REPLY_FIXED_FIELDS_SIZE
 				+ (tb->arg_cnt)*sizeof(u_char),
 				msg, tb->msg_len);
@@ -123,7 +130,7 @@ void tac_author_read(int fd, struct areply *re) {
 
 	/* server message to syslog */
 	if(tb->data_len) {
-		char *smsg=(char *) xcalloc(1, tb->data_len+1);
+		char *smsg=(char *) xcalloc(1, tb->data_len);
 		bcopy((u_char *) tb + TAC_AUTHOR_REPLY_FIXED_FIELDS_SIZE
 				+ (tb->arg_cnt)*sizeof(u_char)
 				+ tb->msg_len, smsg, 
