@@ -83,8 +83,15 @@ char *tac_authen_pap_read(int fd) {
  	/* server authenticated username and password successfully */
  	if(r == TAC_PLUS_AUTHEN_STATUS_PASS) {
 		TACDEBUG((LOG_DEBUG, "%s: authentication ok", __FUNCTION__))
+        free(tb);
 		return(NULL);
 	}
+
+ 	if(tb->msg_len > MAX_MSG_LEN) {
+  		syslog(LOG_ERR, "%s: invalid reply content, incorrect key?", __FUNCTION__);
+        free(tb);
+  		return(system_err_msg);
+ 	}
 
 	if(tb->msg_len) {
 		msg=(char *) xcalloc(1, tb->msg_len);

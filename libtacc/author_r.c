@@ -30,7 +30,8 @@
 void tac_author_read(int fd, struct areply *re) {
 	HDR th;
 	struct author_reply *tb = NULL;
-	int len_from_header, r, len_from_body;
+    int r;
+	unsigned int len_from_header, len_from_body;
 	u_char *pktp;
 	char *msg = NULL;
 
@@ -113,6 +114,12 @@ void tac_author_read(int fd, struct areply *re) {
 
  	if(tb->msg_len > MAX_MSG_LEN) {
   		syslog(LOG_ERR, "%s: message too long %u vs %u limit", __FUNCTION__, tb->msg_len, MAX_MSG_LEN);
+		re->msg = system_err_msg;
+		re->status = AUTHOR_STATUS_ERROR;
+		goto AuthorExit;
+ 	}
+ 	if(tb->data_len > MAX_MSG_LEN) {
+  		syslog(LOG_ERR, "%s: data too long %u vs %u limit", __FUNCTION__, tb->data_len, MAX_MSG_LEN);
 		re->msg = system_err_msg;
 		re->status = AUTHOR_STATUS_ERROR;
 		goto AuthorExit;

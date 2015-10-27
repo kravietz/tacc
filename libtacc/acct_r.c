@@ -72,6 +72,7 @@ char *tac_account_read(int fd) {
  	/* server logged our request successfully */
 	if(r == TAC_PLUS_ACCT_STATUS_SUCCESS) {
 		TACDEBUG((LOG_DEBUG, "%s: accounted ok", __FUNCTION__))
+        free(tb);
 		return(NULL);
 	}
 
